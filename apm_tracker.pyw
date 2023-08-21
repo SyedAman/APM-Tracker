@@ -31,8 +31,6 @@ class ApmTracker:
         self.intervals_since_start = -1
         self.canvas = None
         self.previous_action_time = 0
-        self.keyboard_listener = keyboard.Listener(on_press=self.on_keyboard_press)
-        self.mouse_listener = mouse.Listener(on_click=self.on_mouse_click)
         self.tracking_active = False
 
     def on_keyboard_press(self, key):
@@ -192,9 +190,13 @@ class ApmTracker:
             self.mouse_listener.stop()
 
     def start_tracking(self):
+        self.keyboard_listener = keyboard.Listener(on_press=self.on_keyboard_press)
+        self.mouse_listener = mouse.Listener(on_click=self.on_mouse_click)
+
         # Note: We start the listeners in their own threads so they don't block the main thread
         threading.Thread(target=self.keyboard_listener.start, daemon=True).start()
         threading.Thread(target=self.mouse_listener.start, daemon=True).start()
+
         self.tracking_active = True
         self.update_display()  # Restart the timer and updates
 
@@ -218,6 +220,18 @@ class ApmTracker:
                     time.sleep(1)  # Sleep for a short interval if no new lines
                     continue
                 yield line
+
+    def reset_for_new_session(self):
+        # Reset everything for the new session
+        self.on_reset_all()  # Resets the GUI and most of the data
+        self.APM_list.clear()
+        self.EAPM_list.clear()
+        self.cumulative_actions = 0
+        self.cumulative_effective_actions = 0
+        self.intervals_since_start = -1
+        self.canvas = None
+        self.previous_action_time = 0
+        self.tracking_active = False
 
     def store_session_data(self, average_APM, average_EAPM):
         # File path for the CSV (change it as per your preference)
@@ -251,6 +265,7 @@ class ApmTracker:
 
                 self.store_session_data(average_APM, average_EAPM)
                 tracking_started = False
+                self.reset_for_new_session()
 
     def run(self):
         # Start the log monitoring thread first
