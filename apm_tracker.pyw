@@ -17,14 +17,14 @@ cumulative_effective_actions = 0
 intervals_since_start = -1
 
 
-def on_press(key):
+def on_keyboard_press(key):
     global keystrokes, effective_actions
     keystrokes += 1
     if is_effective_action():
         effective_actions += 1
 
 
-def on_click(x, y, button, pressed):
+def on_mouse_click(x, y, button, pressed):
     global mouse_clicks, effective_actions
     if pressed:
         mouse_clicks += 1
@@ -41,7 +41,7 @@ def is_effective_action():
     return False
 
 
-def on_reset_click():
+def on_reset_all():
     global keystrokes, mouse_clicks, effective_actions
     keystrokes = 0
     mouse_clicks = 0
@@ -157,7 +157,7 @@ def start_gui():
 
 
 
-    reset_button = tk.Button(root, text="Reset", command=on_reset_click, padx=5, pady=5)
+    reset_button = tk.Button(root, text="Reset", command=on_reset_all, padx=5, pady=5)
     reset_button.grid(row=3, column=0, columnspan=2, pady=(0, 20))
 
     frame_graph = ttk.Frame(root)
@@ -175,8 +175,8 @@ def start_gui():
 
 if __name__ == "__main__":
     # Initialize the listeners
-    keyboard_listener = keyboard.Listener(on_press=on_press)
-    mouse_listener = mouse.Listener(on_click=on_click)
+    keyboard_listener = keyboard.Listener(on_press=on_keyboard_press)
+    mouse_listener = mouse.Listener(on_click=on_mouse_click)
     keyboard_listener.start()
     mouse_listener.start()
 
