@@ -138,6 +138,66 @@ class ApmTracker:
                 self.canvas.get_tk_widget().destroy()
                 self.canvas = None
 
+    def store_session_data(self, average_APM, average_EAPM):
+        # File path for the CSV (change it as per your preference)
+        csv_file_path = "session_data.csv"
+
+        # Get current time for timestamping the session
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S")
+
+        # Write to the CSV file
+        with open(csv_file_path, 'a') as file:
+            file.write(f"{current_time},{average_APM:.2f},{average_EAPM:.2f}\n")
+
+    def load_session_data(self):
+        csv_file_path = "session_data.csv"
+        data = []
+        if not os.path.exists(csv_file_path):
+            return data
+
+        with open(csv_file_path, 'r') as file:
+            for line in file:
+                timestamp, average_APM, average_EAPM = line.strip().split(',')
+                data.append((timestamp, float(average_APM), float(average_EAPM)))
+        return data
+
+
+    def draw_historical_graph(self):
+        data = self.load_session_data()
+        if not data:
+            return
+
+        timestamps = [item[0] for item in data]
+        apms = [item[1] for item in data]
+        eapms = [item[2] for item in data]
+
+        fig, ax = plt.subplots(figsize=(5, 4))
+        ax.plot(timestamps, apms, label="APM", color='blue', marker='o')
+        ax.plot(timestamps, eapms, label="EAPM", color='red', marker='o')
+        ax.legend()
+        ax.set_xlabel('Time')
+        ax.set_ylabel('Actions per Minute')
+        ax.set_title('Historical APM & EAPM')
+        ax.set_xticks(ax.get_xticks()[::3])  # Take every 3rd tick for clarity
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha='right')
+
+        if hasattr(self, 'history_canvas') and self.history_canvas:
+            self.history_canvas.get_tk_widget().destroy()
+
+        self.history_canvas = FigureCanvasTkAgg(fig, master=self.session_data_frame)
+        canvas_widget = self.history_canvas.get_tk_widget()
+        canvas_widget.pack()
+        self.history_canvas.draw()
+        plt.tight_layout()
+
+    def refresh_session_data(self):
+        self.session_listbox.delete(0, tk.END)  # Clear the listbox
+        for timestamp, average_APM, average_EAPM in self.load_session_data():
+            self.session_listbox.insert(tk.END,
+                                        f"Time: {timestamp} | APM: {average_APM:.2f} | EAPM: {average_EAPM:.2f}")
+
+        self.draw_historical_graph()
+
     def start_gui(self):
         self.root = tk.Tk()
         self.root.title("APM Tracker")
@@ -178,6 +238,16 @@ class ApmTracker:
 
         self.frame_graph = ttk.Frame(self.root)
         self.frame_graph.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
+
+        self.session_data_frame = ttk.Frame(self.root)
+        self.session_data_frame.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
+
+        self.session_listbox = tk.Listbox(self.session_data_frame, width=50)
+        self.session_listbox.pack()
+
+        refresh_button = tk.Button(self.session_data_frame, text="Refresh Session Data",
+                                   command=self.refresh_session_data)
+        refresh_button.pack(pady=10)
 
         self.root.after(0, self.update_display)
 
@@ -232,17 +302,6 @@ class ApmTracker:
         self.canvas = None
         self.previous_action_time = 0
         self.tracking_active = False
-
-    def store_session_data(self, average_APM, average_EAPM):
-        # File path for the CSV (change it as per your preference)
-        csv_file_path = "session_data.csv"
-
-        # Get current time for timestamping the session
-        current_time = time.strftime("%Y-%m-%d %H:%M:%S")
-
-        # Write to the CSV file
-        with open(csv_file_path, 'a') as file:
-            file.write(f"{current_time},{average_APM:.2f},{average_EAPM:.2f}\n")
 
     def monitor_log_file(self):
         print("Monitoring log file for game start...")
