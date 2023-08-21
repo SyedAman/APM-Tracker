@@ -134,7 +134,7 @@ def start_gui():
     apm_label = tk.Label(root, text="APM: 0.00", font=font_style_bold)
     apm_label.grid(row=2, column=0, padx=20, pady=(10, 0))
 
-    effective_APM_label = tk.Label(root, text="Current EAPM: 0", font=font_style_bold)
+    effective_APM_label = tk.Label(root, text="Current EAPM: 0", font=font_style_regular)
     effective_APM_label.grid(row=0, column=1, padx=20, pady=(10, 0))
 
     peak_eapm_label = tk.Label(root, text="Peak EAPM: N/A", font=font_style_regular)
