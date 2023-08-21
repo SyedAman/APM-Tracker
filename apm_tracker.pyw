@@ -98,9 +98,9 @@ def start_gui():
     peak_apm_label.pack()
 
     peak_eapm_label = tk.Label(root, text="Peak EAPM: N/A", font=font_style_regular)
-    peak_eapm_label.pack()
+    peak_eapm_label.pack(pady=(0, 10))  # Added padding at the bottom
 
-    reset_button = tk.Button(root, text="Reset", command=on_reset_click)
+    reset_button = tk.Button(root, text="Reset", command=on_reset_click, padx=5, pady=5)
     reset_button.pack()
 
     root.after(0, update_display)
