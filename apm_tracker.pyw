@@ -103,8 +103,20 @@ class ApmTracker:
         self.effective_actions = 0
         self.start_time = time.time()
 
-        self.draw_graph()
+        if self.show_graph_var.get():
+            self.draw_graph()
+
         self.root.after(30000, self.update_display)
+
+    def toggle_graph(self):
+        if self.show_graph_var.get():
+            self.frame_graph.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
+            self.draw_graph()
+        else:
+            self.frame_graph.grid_remove()
+            if self.canvas:
+                self.canvas.get_tk_widget().destroy()
+                self.canvas = None
 
     def start_gui(self):
         self.root = tk.Tk()
@@ -138,6 +150,11 @@ class ApmTracker:
 
         reset_button = tk.Button(self.root, text="Reset", command=self.on_reset_all, padx=5, pady=5)
         reset_button.grid(row=3, column=0, columnspan=2, pady=(0, 20))
+
+        self.show_graph_var = tk.BooleanVar()
+        self.show_graph_var.set(True)
+        self.graph_checkbutton = tk.Checkbutton(self.root, text="Show Graph", variable=self.show_graph_var, command=self.toggle_graph)
+        self.graph_checkbutton.grid(row=5, column=0, columnspan=2)
 
         self.frame_graph = ttk.Frame(self.root)
         self.frame_graph.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
