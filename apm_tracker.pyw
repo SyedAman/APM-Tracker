@@ -1,5 +1,8 @@
+import re
+
 from pynput import keyboard, mouse
 import time
+import os
 import tkinter as tk
 from tkinter import ttk
 import matplotlib.pyplot as plt
@@ -181,6 +184,33 @@ class ApmTracker:
         self.start_gui()
 
 
+
+def follow(file_path):
+    """Read new lines from a file."""
+    with open(file_path, 'r') as f:
+        f.seek(0, 2)  # Go to the end of the file
+        while True:
+            line = f.readline()
+            print(line)
+            if not line:
+                time.sleep(1)  # Sleep for a short interval if no new lines
+                continue
+            yield line
+
 if __name__ == "__main__":
     app = ApmTracker()
-    app.run()
+
+    log_file_path = 'C:\\Users\\syedn\\OneDrive\\OneDrive Documents\\My Games\\Company of Heroes 3\\warnings.log'
+    pattern = re.compile(r"\bGAME -- Starting mission\b")
+
+    print("Monitoring log file for game start...")
+
+    log_generator = follow(log_file_path)
+
+    for line in log_generator:
+        if pattern.search(line):
+            print("Match started! Starting APM tracking...")
+
+            app.run()
+
+            break
