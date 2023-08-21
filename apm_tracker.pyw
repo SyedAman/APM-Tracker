@@ -31,9 +31,9 @@ class ApmTracker:
         self.intervals_since_start = -1
         self.canvas = None
         self.previous_action_time = 0
-
         self.keyboard_listener = keyboard.Listener(on_press=self.on_keyboard_press)
         self.mouse_listener = mouse.Listener(on_click=self.on_mouse_click)
+        self.tracking_active = False
 
     def on_keyboard_press(self, key):
         self.keystrokes += 1
@@ -94,6 +94,9 @@ class ApmTracker:
         plt.tight_layout()
 
     def update_display(self):
+        if not self.tracking_active:
+            return
+
         current_APM = self.keystrokes + self.mouse_clicks
         self.APM_list.append(current_APM)
 
@@ -187,10 +190,21 @@ class ApmTracker:
 
         if hasattr(self, 'mouse_listener'):
             self.mouse_listener.stop()
+
     def start_tracking(self):
         # Note: We start the listeners in their own threads so they don't block the main thread
         threading.Thread(target=self.keyboard_listener.start, daemon=True).start()
         threading.Thread(target=self.mouse_listener.start, daemon=True).start()
+        self.tracking_active = True
+        self.update_display()  # Restart the timer and updates
+
+    def stop_tracking(self):
+        if hasattr(self, 'keyboard_listener'):
+            self.keyboard_listener.stop()
+        if hasattr(self, 'mouse_listener'):
+            self.mouse_listener.stop()
+        self.tracking_active = False
+        self.root.after_cancel(self.timer_id)  # Stop the timer
 
     @staticmethod
     def follow(file_path):
@@ -205,14 +219,6 @@ class ApmTracker:
                     continue
                 yield line
 
-    def stop_tracking(self):
-        if hasattr(self, 'keyboard_listener'):
-            self.keyboard_listener.stop()
-
-        if hasattr(self, 'mouse_listener'):
-            self.mouse_listener.stop()
-
-        print("APM tracking has been stopped.")
 
     def monitor_log_file(self):
         print("Monitoring log file for game start...")
