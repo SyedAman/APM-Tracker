@@ -12,6 +12,8 @@ effective_actions = 0
 time_threshold = 0.2  # 200ms (ideal time as human spam is often not slower than this)
 APM_list = []
 EAPM_list = []
+cumulative_actions = 0
+intervals_since_start = 0
 
 
 def on_press(key):
@@ -70,7 +72,7 @@ def draw_graph():
 
 
 def update_display():
-    global keystrokes, mouse_clicks, effective_actions, start_time
+    global keystrokes, mouse_clicks, effective_actions, start_time, cumulative_actions, intervals_since_start
 
     current_APM = keystrokes + mouse_clicks
     APM_list.append(current_APM)
@@ -81,8 +83,15 @@ def update_display():
     peak_APM = max(APM_list)
     peak_EAPM = max(EAPM_list)
 
+    # Update cumulative actions and intervals
+    cumulative_actions += current_APM
+    intervals_since_start += 1
+
+    average_APM = cumulative_actions / intervals_since_start
+
     # Update GUI
-    apm_label.config(text="Current APM: {}".format(current_APM))
+    apm_label.config(text="APM: {:.2f}".format(average_APM))
+    current_apm_label.config(text="Current APM: {}".format(current_APM))
     peak_apm_label.config(text="Peak APM: {}".format(peak_APM))
 
     effective_APM_label.config(text="Current EAPM: {}".format(current_EAPM))
@@ -99,7 +108,7 @@ def update_display():
 
 
 def start_gui():
-    global root, apm_label, peak_apm_label, effective_APM_label, peak_eapm_label, keyboard_listener, mouse_listener, canvas, frame_graph
+    global root, apm_label, current_apm_label, peak_apm_label, effective_APM_label, peak_eapm_label, keyboard_listener, mouse_listener, canvas, frame_graph
 
     # Create GUI window
     root = tk.Tk()
@@ -112,8 +121,11 @@ def start_gui():
     font_style_bold = ("Arial", 12, "bold")
     font_style_regular = ("Arial", 10, "italic")
 
-    apm_label = tk.Label(root, text="Current APM: 0", font=font_style_bold)
-    apm_label.grid(row=0, column=0, padx=20, pady=(10, 0))
+    apm_label = tk.Label(root, text="APM: 0.00", font=font_style_bold)
+    apm_label.grid(row=2, column=0, padx=20, pady=(10, 0))
+
+    current_apm_label = tk.Label(root, text="Current APM: 0", font=font_style_regular)
+    current_apm_label.grid(row=0, column=0, padx=20, pady=(10, 0))
 
     peak_apm_label = tk.Label(root, text="Peak APM: N/A", font=font_style_regular)
     peak_apm_label.grid(row=1, column=0, padx=20, pady=10)
