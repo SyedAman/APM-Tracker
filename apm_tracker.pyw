@@ -51,6 +51,13 @@ def on_reset_click():
     update_display()
 
 
+def close_window():
+    keyboard_listener.stop()
+    mouse_listener.stop()
+    root.quit()
+    root.destroy()
+
+
 def draw_graph():
     global canvas
     fig, ax = plt.subplots(figsize=(5, 4))
@@ -121,6 +128,8 @@ def start_gui():
     root.resizable(False, False)
     root.attributes("-topmost", True)
     root.lift()
+
+    root.protocol("WM_DELETE_WINDOW", close_window)
 
     font_style_bold = ("Arial", 12, "bold")
     font_style_regular = ("Arial", 10, "italic")
