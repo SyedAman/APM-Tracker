@@ -42,13 +42,17 @@ def is_effective_action():
 
 
 def on_reset_all():
-    global keystrokes, mouse_clicks, effective_actions
+    global keystrokes, mouse_clicks, effective_actions, cumulative_actions, cumulative_effective_actions, intervals_since_start
     keystrokes = 0
     mouse_clicks = 0
     effective_actions = 0
     APM_list.clear()
     EAPM_list.clear()
+    cumulative_actions = 0
+    cumulative_effective_actions = 0
+    intervals_since_start = -1
     update_display()
+
 
 
 def close_window():
