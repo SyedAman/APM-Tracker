@@ -48,6 +48,12 @@ class ApmTracker:
         self.cumulative_actions = 0
         self.cumulative_effective_actions = 0
         self.intervals_since_start = -1
+        self.start_time = time.time()
+
+        # Cancel the previous timer
+        self.root.after_cancel(self.timer_id)
+
+        # Immediately update the display
         self.update_display()
 
     def close_window(self):
@@ -61,7 +67,7 @@ class ApmTracker:
         ax.plot(self.APM_list, label="APM", color='blue', marker='o')
         ax.plot(self.EAPM_list, label="EAPM", color='red', marker='o')
         ax.legend()
-        ax.set_xlabel('Time (30s intervals)')
+        ax.set_xlabel('Time (1min intervals)')
         ax.set_ylabel('Actions per Minute')
         ax.set_title('APM & EAPM Over Time')
 
@@ -106,7 +112,7 @@ class ApmTracker:
         if self.show_graph_var.get():
             self.draw_graph()
 
-        self.root.after(30000, self.update_display)
+        self.timer_id = self.root.after(60000, self.update_display)
 
     def toggle_graph(self):
         if self.show_graph_var.get():
