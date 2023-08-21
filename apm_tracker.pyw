@@ -3,11 +3,19 @@ import re
 from pynput import keyboard, mouse
 import time
 import os
+import threading
 import tkinter as tk
 from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import sys
 
+def handle_thread_exception(args):
+    print(f"Exception in thread {args.exc_type}", file=sys.stderr)
+    print(args.exc_value, file=sys.stderr)
+    print(args.exc_traceback, file=sys.stderr)
+
+threading.excepthook = handle_thread_exception
 
 class ApmTracker:
     def __init__(self):
@@ -23,6 +31,9 @@ class ApmTracker:
         self.intervals_since_start = -1
         self.canvas = None
         self.previous_action_time = 0
+
+        self.keyboard_listener = keyboard.Listener(on_press=self.on_keyboard_press)
+        self.mouse_listener = mouse.Listener(on_click=self.on_mouse_click)
 
     def on_keyboard_press(self, key):
         self.keystrokes += 1
@@ -62,7 +73,6 @@ class ApmTracker:
     def close_window(self):
         self.keyboard_listener.stop()
         self.mouse_listener.stop()
-        self.root.quit()
         self.root.destroy()
 
     def draw_graph(self):
@@ -169,48 +179,60 @@ class ApmTracker:
         self.frame_graph.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
 
         self.root.after(0, self.update_display)
+
         self.root.mainloop()
 
-        self.keyboard_listener.stop()
-        self.mouse_listener.stop()
+        if hasattr(self, 'keyboard_listener'):
+            self.keyboard_listener.stop()
+
+        if hasattr(self, 'mouse_listener'):
+            self.mouse_listener.stop()
+    def start_tracking(self):
+        # Note: We start the listeners in their own threads so they don't block the main thread
+        threading.Thread(target=self.keyboard_listener.start, daemon=True).start()
+        threading.Thread(target=self.mouse_listener.start, daemon=True).start()
+
+    @staticmethod
+    def follow(file_path):
+        """Read new lines from a file."""
+        with open(file_path, 'r') as f:
+            f.seek(0, 2)  # Go to the end of the file
+            while True:
+                line = f.readline()
+                print(line)
+                if not line:
+                    time.sleep(1)  # Sleep for a short interval if no new lines
+                    continue
+                yield line
+
+    def monitor_log_file(self):
+        print("Monitoring log file for game start...")
+        log_generator = ApmTracker.follow(self.log_file_path)
+        for line in log_generator:
+            if self.pattern.search(line):
+                print("Match started! Starting APM tracking...")
+                self.start_tracking()
+                break
 
     def run(self):
-        self.keyboard_listener = keyboard.Listener(on_press=self.on_keyboard_press)
-        self.mouse_listener = mouse.Listener(on_click=self.on_mouse_click)
+        # Start the log monitoring thread first
+        threading.Thread(target=self.monitor_log_file, daemon=True).start()
 
-        self.keyboard_listener.start()
-        self.mouse_listener.start()
-
+        # Now, start the GUI in the main thread
         self.start_gui()
 
 
-
-def follow(file_path):
-    """Read new lines from a file."""
-    with open(file_path, 'r') as f:
-        f.seek(0, 2)  # Go to the end of the file
-        while True:
-            line = f.readline()
-            print(line)
-            if not line:
-                time.sleep(1)  # Sleep for a short interval if no new lines
-                continue
-            yield line
-
 if __name__ == "__main__":
+    # Instantiate the ApmTracker class
     app = ApmTracker()
 
+    # Set the log file path and pattern
     log_file_path = 'C:\\Users\\syedn\\OneDrive\\OneDrive Documents\\My Games\\Company of Heroes 3\\warnings.log'
     pattern = re.compile(r"\bGAME -- Starting mission\b")
 
-    print("Monitoring log file for game start...")
+    # Set these attributes in the ApmTracker instance so that they can be used inside its methods
+    app.log_file_path = log_file_path
+    app.pattern = pattern
 
-    log_generator = follow(log_file_path)
-
-    for line in log_generator:
-        if pattern.search(line):
-            print("Match started! Starting APM tracking...")
-
-            app.run()
-
-            break
+    # Start the application (This will spawn both the GUI and log monitoring threads)
+    app.run()
