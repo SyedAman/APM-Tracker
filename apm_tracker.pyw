@@ -14,7 +14,7 @@ APM_list = []
 EAPM_list = []
 cumulative_actions = 0
 cumulative_effective_actions = 0
-intervals_since_start = 0
+intervals_since_start = -1
 
 
 def on_press(key):
@@ -89,8 +89,8 @@ def update_display():
     cumulative_effective_actions += current_EAPM
     intervals_since_start += 1
 
-    average_APM = cumulative_actions / intervals_since_start
-    average_EAPM = cumulative_effective_actions / intervals_since_start
+    average_APM = cumulative_actions / intervals_since_start if intervals_since_start != 0  else 0
+    average_EAPM = cumulative_effective_actions / intervals_since_start if intervals_since_start != 0 else 0
 
     # Update GUI
     apm_label.config(text="APM: {:.2f}".format(average_APM))
