@@ -202,8 +202,8 @@ class ApmTracker:
         self.root = tk.Tk()
         self.root.title("APM Tracker")
         self.root.geometry("1100x650")  # Increase the window width
-        self.root.resizable(False, False)
-        self.root.attributes("-topmost", True)
+        self.root.resizable(True, True)
+        self.root.attributes("-topmost", False)
         self.root.lift()
         self.root.protocol("WM_DELETE_WINDOW", self.close_window)
 
