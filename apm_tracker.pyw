@@ -13,6 +13,7 @@ time_threshold = 0.2  # 200ms (ideal time as human spam is often not slower than
 APM_list = []
 EAPM_list = []
 cumulative_actions = 0
+cumulative_effective_actions = 0
 intervals_since_start = 0
 
 
@@ -72,7 +73,7 @@ def draw_graph():
 
 
 def update_display():
-    global keystrokes, mouse_clicks, effective_actions, start_time, cumulative_actions, intervals_since_start
+    global keystrokes, mouse_clicks, effective_actions, start_time, cumulative_actions, intervals_since_start, cumulative_effective_actions
 
     current_APM = keystrokes + mouse_clicks
     APM_list.append(current_APM)
@@ -85,15 +86,17 @@ def update_display():
 
     # Update cumulative actions and intervals
     cumulative_actions += current_APM
+    cumulative_effective_actions += current_EAPM
     intervals_since_start += 1
 
     average_APM = cumulative_actions / intervals_since_start
+    average_EAPM = cumulative_effective_actions / intervals_since_start
 
     # Update GUI
     apm_label.config(text="APM: {:.2f}".format(average_APM))
     current_apm_label.config(text="Current APM: {}".format(current_APM))
     peak_apm_label.config(text="Peak APM: {}".format(peak_APM))
-
+    effective_apm_label.config(text="EAPM: {:.2f}".format(average_EAPM))
     effective_APM_label.config(text="Current EAPM: {}".format(current_EAPM))
     peak_eapm_label.config(text="Peak EAPM: {}".format(peak_EAPM))
 
@@ -107,8 +110,9 @@ def update_display():
     root.after(30000, update_display)
 
 
+
 def start_gui():
-    global root, apm_label, current_apm_label, peak_apm_label, effective_APM_label, peak_eapm_label, keyboard_listener, mouse_listener, canvas, frame_graph
+    global root, apm_label, current_apm_label, peak_apm_label, effective_APM_label, peak_eapm_label, effective_apm_label, keyboard_listener, mouse_listener, canvas, frame_graph
 
     # Create GUI window
     root = tk.Tk()
@@ -136,11 +140,14 @@ def start_gui():
     peak_eapm_label = tk.Label(root, text="Peak EAPM: N/A", font=font_style_regular)
     peak_eapm_label.grid(row=1, column=1, padx=20, pady=10)
 
+    effective_apm_label = tk.Label(root, text="EAPM: 0.00", font=font_style_bold)
+    effective_apm_label.grid(row=3, column=1, padx=20, pady=(10, 0))
+
     reset_button = tk.Button(root, text="Reset", command=on_reset_click, padx=5, pady=5)
-    reset_button.grid(row=3, column=0, columnspan=2, pady=(0, 20))
+    reset_button.grid(row=4, column=0, columnspan=2, pady=(0, 20))
 
     frame_graph = ttk.Frame(root)
-    frame_graph.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
+    frame_graph.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
     canvas = None
 
     root.after(0, update_display)
@@ -149,6 +156,7 @@ def start_gui():
     # Stop listeners and exit
     keyboard_listener.stop()
     mouse_listener.stop()
+
 
 
 if __name__ == "__main__":
