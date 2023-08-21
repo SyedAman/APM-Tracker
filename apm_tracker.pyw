@@ -93,11 +93,11 @@ def update_display():
     average_EAPM = cumulative_effective_actions / intervals_since_start if intervals_since_start != 0 else 0
 
     # Update GUI
-    apm_label.config(text="APM: {:.2f}".format(average_APM))
+    average_apm_label.config(text="APM: {:.2f}".format(average_APM))
     current_apm_label.config(text="Current APM: {}".format(current_APM))
     peak_apm_label.config(text="Peak APM: {}".format(peak_APM))
-    effective_apm_label.config(text="EAPM: {:.2f}".format(average_EAPM))
-    effective_APM_label.config(text="Current EAPM: {}".format(current_EAPM))
+    average_eapm_label.config(text="EAPM: {:.2f}".format(average_EAPM))
+    current_eapm_label.config(text="Current EAPM: {}".format(current_EAPM))
     peak_eapm_label.config(text="Peak EAPM: {}".format(peak_EAPM))
 
     # Reset for the next interval
@@ -112,7 +112,7 @@ def update_display():
 
 
 def start_gui():
-    global root, apm_label, current_apm_label, peak_apm_label, effective_APM_label, peak_eapm_label, effective_apm_label, keyboard_listener, mouse_listener, canvas, frame_graph
+    global root, average_apm_label, current_apm_label, peak_apm_label, current_eapm_label, peak_eapm_label, average_eapm_label, keyboard_listener, mouse_listener, canvas, frame_graph
 
     # Create GUI window
     root = tk.Tk()
@@ -125,23 +125,28 @@ def start_gui():
     font_style_bold = ("Arial", 12, "bold")
     font_style_regular = ("Arial", 10, "italic")
 
+
+    average_apm_label = tk.Label(root, text="APM: 0.00", font=font_style_bold)
+    average_apm_label.grid(row=0, column=0, padx=20, pady=(10, 0))
+
     current_apm_label = tk.Label(root, text="Current APM: 0", font=font_style_regular)
-    current_apm_label.grid(row=0, column=0, padx=20, pady=(10, 0))
+    current_apm_label.grid(row=1, column=0, padx=20, pady=(10, 0))
 
     peak_apm_label = tk.Label(root, text="Peak APM: N/A", font=font_style_regular)
-    peak_apm_label.grid(row=1, column=0, padx=20, pady=10)
+    peak_apm_label.grid(row=2, column=0, padx=20, pady=10)
 
-    apm_label = tk.Label(root, text="APM: 0.00", font=font_style_bold)
-    apm_label.grid(row=2, column=0, padx=20, pady=(10, 0))
 
-    effective_APM_label = tk.Label(root, text="Current EAPM: 0", font=font_style_regular)
-    effective_APM_label.grid(row=0, column=1, padx=20, pady=(10, 0))
+
+    average_eapm_label = tk.Label(root, text="EAPM: 0.00", font=font_style_bold)
+    average_eapm_label.grid(row=0, column=1, padx=20, pady=(10, 0))
+
+    current_eapm_label = tk.Label(root, text="Current EAPM: 0", font=font_style_regular)
+    current_eapm_label.grid(row=1, column=1, padx=20, pady=(10, 0))
 
     peak_eapm_label = tk.Label(root, text="Peak EAPM: N/A", font=font_style_regular)
-    peak_eapm_label.grid(row=1, column=1, padx=20, pady=10)
+    peak_eapm_label.grid(row=2, column=1, padx=20, pady=10)
 
-    effective_apm_label = tk.Label(root, text="EAPM: 0.00", font=font_style_bold)
-    effective_apm_label.grid(row=2, column=1, padx=20, pady=(10, 0))
+
 
     reset_button = tk.Button(root, text="Reset", command=on_reset_click, padx=5, pady=5)
     reset_button.grid(row=3, column=0, columnspan=2, pady=(0, 20))
