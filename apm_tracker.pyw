@@ -205,13 +205,29 @@ class ApmTracker:
                     continue
                 yield line
 
+    def stop_tracking(self):
+        if hasattr(self, 'keyboard_listener'):
+            self.keyboard_listener.stop()
+
+        if hasattr(self, 'mouse_listener'):
+            self.mouse_listener.stop()
+
+        print("APM tracking has been stopped.")
+
     def monitor_log_file(self):
         print("Monitoring log file for game start...")
         log_generator = ApmTracker.follow(self.log_file_path)
+        end_pattern = re.compile(r"GameObj::ShutdownGameObj")  # New pattern for game shutdown
+        tracking_started = False
+
         for line in log_generator:
-            if self.pattern.search(line):
+            if not tracking_started and self.pattern.search(line):
                 print("Match started! Starting APM tracking...")
                 self.start_tracking()
+                tracking_started = True
+            elif tracking_started and end_pattern.search(line):  # Use regex search here
+                print("Match ended! Stopping APM tracking...")
+                self.stop_tracking()
                 break
 
     def run(self):
