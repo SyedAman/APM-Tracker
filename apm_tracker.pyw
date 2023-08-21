@@ -219,6 +219,16 @@ class ApmTracker:
                     continue
                 yield line
 
+    def store_session_data(self, average_APM, average_EAPM):
+        # File path for the CSV (change it as per your preference)
+        csv_file_path = "session_data.csv"
+
+        # Get current time for timestamping the session
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S")
+
+        # Write to the CSV file
+        with open(csv_file_path, 'a') as file:
+            file.write(f"{current_time},{average_APM:.2f},{average_EAPM:.2f}\n")
 
     def monitor_log_file(self):
         print("Monitoring log file for game start...")
@@ -234,7 +244,13 @@ class ApmTracker:
             elif tracking_started and end_pattern.search(line):  # Use regex search here
                 print("Match ended! Stopping APM tracking...")
                 self.stop_tracking()
-                break
+
+                # Calculate average APM and EAPM for the session
+                average_APM = self.cumulative_actions / self.intervals_since_start if self.intervals_since_start != 0 else 0
+                average_EAPM = self.cumulative_effective_actions / self.intervals_since_start if self.intervals_since_start != 0 else 0
+
+                self.store_session_data(average_APM, average_EAPM)
+                tracking_started = False
 
     def run(self):
         # Start the log monitoring thread first
