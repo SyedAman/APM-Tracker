@@ -201,7 +201,7 @@ class ApmTracker:
     def start_gui(self):
         self.root = tk.Tk()
         self.root.title("APM Tracker")
-        self.root.geometry("550x650")
+        self.root.geometry("1100x650")  # Increase the window width
         self.root.resizable(False, False)
         self.root.attributes("-topmost", True)
         self.root.lift()
@@ -209,6 +209,8 @@ class ApmTracker:
 
         font_style_bold = ("Arial", 12, "bold")
         font_style_regular = ("Arial", 10, "italic")
+
+        # --- Left Side of the GUI (Current Session) ---
 
         self.average_apm_label = tk.Label(self.root, text="APM: 0.00", font=font_style_bold)
         self.average_apm_label.grid(row=0, column=0, padx=20, pady=(10, 0))
@@ -233,14 +235,17 @@ class ApmTracker:
 
         self.show_graph_var = tk.BooleanVar()
         self.show_graph_var.set(True)
-        self.graph_checkbutton = tk.Checkbutton(self.root, text="Show Graph", variable=self.show_graph_var, command=self.toggle_graph)
+        self.graph_checkbutton = tk.Checkbutton(self.root, text="Show Graph", variable=self.show_graph_var,
+                                                command=self.toggle_graph)
         self.graph_checkbutton.grid(row=5, column=0, columnspan=2)
 
         self.frame_graph = ttk.Frame(self.root)
         self.frame_graph.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
 
+        # --- Right Side of the GUI (Session History) ---
+
         self.session_data_frame = ttk.Frame(self.root)
-        self.session_data_frame.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
+        self.session_data_frame.grid(row=0, column=2, rowspan=6, padx=10, pady=10, sticky='n')
 
         self.session_listbox = tk.Listbox(self.session_data_frame, width=50)
         self.session_listbox.pack()
@@ -249,15 +254,11 @@ class ApmTracker:
                                    command=self.refresh_session_data)
         refresh_button.pack(pady=10)
 
+        # --- End of visual stuff ---
+
         self.root.after(0, self.update_display)
 
         self.root.mainloop()
-
-        if hasattr(self, 'keyboard_listener'):
-            self.keyboard_listener.stop()
-
-        if hasattr(self, 'mouse_listener'):
-            self.mouse_listener.stop()
 
     def start_tracking(self):
         self.keyboard_listener = keyboard.Listener(on_press=self.on_keyboard_press)
