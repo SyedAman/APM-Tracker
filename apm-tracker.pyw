@@ -41,18 +41,24 @@ def is_effective_action():  # Checks for effective actions (EAPM)
     return False
 
 
-def find_APM(keystrokes, mouse_clicks):  # Calculates Actions Per Minute
+def calculate_actions_per_minute(actions_count):
+    """Calculate and return actions per minute."""
     current_time = time.time()
     elapsed_time = current_time - start_time
-    actions = ((keystrokes + mouse_clicks) / elapsed_time) * 60
-    return actions
+
+    # Check if elapsed_time is zero or extremely close to zero
+    if elapsed_time < 1e-6:  # 1e-6 is a small threshold to avoid precision issues
+        return 0
+
+    return (actions_count / elapsed_time) * 60
+
+
+def find_APM(keystrokes, mouse_clicks):  # Calculates Actions Per Minute
+    return calculate_actions_per_minute(keystrokes + mouse_clicks)
 
 
 def find_EAPM(effective_actions):  # Calculates Effective Actions Per Minute
-    current_time = time.time()
-    elapsed_time = current_time - start_time
-    eapm = (effective_actions / elapsed_time) * 60
-    return eapm
+    return calculate_actions_per_minute(effective_actions)
 
 
 def reset_counters():
