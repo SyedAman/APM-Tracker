@@ -4,3 +4,9 @@ A stand-alone, simple, light-weight program intended to track actions per minute
 This program was made with python and several respective libraries, the repo contains the code, and the ready to run windows executable file. (.exe)
 
 To use this, download the .exe and run it, or compile the python script.
+
+## Backlog
+
+* Force start tracking with a button
+* Automatically start tracking even if you load the app after game starts
+* Indicator showing that APM is being tracked (green)

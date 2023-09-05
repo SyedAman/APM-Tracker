@@ -3,3 +3,5 @@ pynput==1.7.6
 setuptools==60.2.0
 six==1.16.0
 wheel==0.37.1
+
+matplotlib~=3.7.2

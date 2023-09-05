@@ -286,7 +286,6 @@ class ApmTracker:
             f.seek(0, 2)  # Go to the end of the file
             while True:
                 line = f.readline()
-                print(line)
                 if not line:
                     time.sleep(1)  # Sleep for a short interval if no new lines
                     continue
