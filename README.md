@@ -10,3 +10,4 @@ To use this, download the .exe and run it, or compile the python script.
 * Force start tracking with a button
 * Automatically start tracking even if you load the app after game starts
 * Indicator showing that APM is being tracked (green)
+* Auto remove 0 apm csv entries

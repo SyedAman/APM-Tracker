@@ -322,7 +322,9 @@ class ApmTracker:
                 average_APM = self.cumulative_actions / self.intervals_since_start if self.intervals_since_start != 0 else 0
                 average_EAPM = self.cumulative_effective_actions / self.intervals_since_start if self.intervals_since_start != 0 else 0
 
-                self.store_session_data(average_APM, average_EAPM)
+                if average_APM != 0.0 and average_EAPM != 0.0:
+                    self.store_session_data(average_APM, average_EAPM)
+
                 tracking_started = False
                 self.reset_for_new_session()
 
