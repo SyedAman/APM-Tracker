@@ -19,6 +19,8 @@ threading.excepthook = handle_thread_exception
 
 class ApmTracker:
     def __init__(self):
+        self.keyboard_listener = None
+        self.mouse_listener = None
         self.keystrokes = 0
         self.mouse_clicks = 0
         self.start_time = time.time()
@@ -210,6 +212,10 @@ class ApmTracker:
         font_style_bold = ("Arial", 12, "bold")
         font_style_regular = ("Arial", 10, "italic")
 
+        # Adding a Canvas widget as a tracking indicator
+        self.tracking_indicator = tk.Canvas(self.root, width=20, height=20, bg="red")
+        self.tracking_indicator.grid(row=6, column=0, columnspan=2, pady=(0, 20))
+
         # --- Left Side of the GUI (Current Session) ---
 
         self.average_apm_label = tk.Label(self.root, text="APM: 0.00", font=font_style_bold)
@@ -268,6 +274,7 @@ class ApmTracker:
         threading.Thread(target=self.keyboard_listener.start, daemon=True).start()
         threading.Thread(target=self.mouse_listener.start, daemon=True).start()
 
+        self.tracking_indicator.config(bg="green")
         self.tracking_active = True
         self.update_display()  # Restart the timer and updates
 
@@ -276,6 +283,8 @@ class ApmTracker:
             self.keyboard_listener.stop()
         if hasattr(self, 'mouse_listener'):
             self.mouse_listener.stop()
+
+        self.tracking_indicator.config(bg="red")
         self.tracking_active = False
         self.root.after_cancel(self.timer_id)  # Stop the timer
 
